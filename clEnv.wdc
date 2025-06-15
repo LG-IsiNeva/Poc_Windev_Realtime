@@ -1,0 +1,139 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : clEnv
+ major_version : 30
+ minor_version : 0
+ type : 4
+ description : ""
+ subtype : 0
+class :
+ identifier : 0x184538720014fda9
+ internal_properties : HgAAAB4AAAB2/vstTMCJbS/hlxjFxirSqKvCUuv8YxgpWyl7S3iA
+ code_elements :
+  type_code : 10
+  p_codes :
+   -
+     code : |1+
+      clEnv est une Classe
+      	GLOBAL
+      		m_Instance est un clEnv dynamique
+      	PRIVEE
+      		m_aValeurs est un tableau associatif de chaînes
+      		
+      		
+      fin
+     type : 131072
+  procedures :
+   -
+     name : Constructeur
+     procedure_id : 1748866092582174121
+     type_code : 27
+     code : |1-
+      procédure privée Constructeur()
+      
+      lsFicEnv		est une chaîne
+      lsContenuFic	est une chaîne
+      lsLigne			est une chaîne
+      lsCle			est une chaîne
+      lsValeur		est une chaîne
+      lnPos			est un entier
+      
+      lsFicEnv = fRepExe()+["\"]+".env"
+      
+      m_aValeurs.SupprimeTout()
+      
+      SI fFichierExiste(lsFicEnv) ALORS
+      
+      	lsContenuFic = fChargeTexte(lsFicEnv)
+      	lsContenuFic = remplace(lsContenuFic,tab,"")
+      	
+      	// Le fichier .env est un fichier au format .env javascript
+      	// On traite ligne par ligne
+      	pour toute chaine lsLigne de lsContenuFic séparée par RC
+      
+      		// Supprime les espaces en début et fin
+      		lsLigne	= SansEspace(lsLigne, ccSansEspace)
+      
+      		// Ignore les lignes vides et les commentaires (commençant par #)
+      		SI lsLigne <> "" ET Gauche(lsLigne, 1) <> "#" ALORS
+      			// Recherche le signe =
+      			lnPos = Position(lsLigne, "=")
+      
+      			SI lnPos > 0 ALORS
+      				// Extrait la clé et la valeur
+      				lsCle		= SansEspace(Gauche(lsLigne, lnPos - 1), sscTout)
+      				lsValeur	= Droite(lsLigne, Taille(lsLigne) - lnPos)
+      				lsValeur 	= SansEspace(lsValeur, ccSansEspace)
+      
+      				// Supprime les guillemets de début et fin si présents
+      				SI (Gauche(lsValeur, 1) = """" ET Droite(lsValeur, 1) = """") OU ...
+      					(Gauche(lsValeur, 1) = "'" ET Droite(lsValeur, 1) = "'") ALORS
+      					lsValeur = Milieu(lsValeur, 2, Taille(lsValeur) - 2)
+      				FIN
+      
+      				// Ajoute dans le tableau associatif
+      				m_aValeurs[lsCle] = lsValeur
+      
+      			FIN
+      
+      		FIN
+      
+      	FIN
+      
+      FIN
+     type : 589824
+   -
+     name : Destructeur
+     procedure_id : 1748866092582239657
+     type_code : 28
+     code : |1+
+      procédure Destructeur()
+      
+     type : 655360
+   -
+     name : sGetEnv
+     procedure_id : 1748867114817723859
+     type_code : 12
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] sGetEnv (<psCle> est chaîne [, <psValeurParDefaut> est chaîne])
+      //
+      // Paramètres :
+      //	psCle (chaîne ANSI) : <indiquez ici le rôle de psCle>
+      //	psValeurParDefaut (chaîne ANSI - valeur par défaut="") : <indiquez ici le rôle de psValeurParDefaut>
+      // Valeur de retour :
+      // 	chaîne ANSI : <indiquez ici le rôle de la valeur de retour>
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure publique globale sGetEnv(psCle est une chaîne,psValeurParDefaut est une chaine =""):chaîne
+      sValRetour est une chaîne
+      
+      SI m_Instance=Null ALORS
+      	m_Instance = allouer clEnv()
+      FIN
+      
+      sValRetour = psValeurParDefaut
+      
+      SI m_aValeurs[psCle]..existe ALORS
+      
+      	sValRetour = m_aValeurs[psCle]
+      
+      FIN
+      
+      renvoyer sValRetour
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : HgAAAB4AAADXPUOq6bQdTI/fs1mC0I6nimWl2G84EsAbne5i32IM05uoRA==
+  original_name : Classe1
+resources :
+ string_res :
+  identifier : 0x1845385a00119ea1
+  internal_properties : HgAAAB4AAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : HgAAAB4AAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ

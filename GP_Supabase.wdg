@@ -1,0 +1,569 @@
+#To edit and compare internal_properties, use WINDEV integrated tools.
+#Internal properties refer to the properties of controls in windows, reports, etc.
+info :
+ name : GP_Supabase
+ major_version : 30
+ minor_version : 0
+ type : 7
+ description : ""
+ subtype : 0
+procedure_set :
+ identifier : 0x18492bba22445988
+ internal_properties : HgAAAB4AAABGLu41kG7fjQV3iS4F72qmnKaNh5694reolNKIW0iw
+ code_elements :
+  type_code : 31
+  p_codes :
+   -
+     code : |1+
+      CONSTANTE
+      
+      	TABLE_NAME	= "commande" // Le nom de votre table
+      	SCHEMA_NAME	= "public" // Le schéma de votre table
+      
+      FIN
+      
+      GLOBAL
+      sSUPABASE_URL			est une chaîne
+      sSUPABASE_API_URL		est une chaîne
+      sSUPABASE_AUTH_URL		est une chaîne
+      sSUPABASE_APIKEY		est une chaîne
+      sSUPABASE_ANON_KEY		est une chaîne
+      sSUPABASE_USRLOG		est une chaîne
+      sSUPABASE_USRPWD		est une chaîne
+      
+      // Identifiant du timer pour le ping/heartbeat
+      IDTimerPing				est un entier	= 0
+      
+      // Variable pour la référence de jonction (phx_join)
+      g_nJoinRef				est un entier	= 1
+      
+      gsToken est une chaîne
+      gsLog 	est une chaine
+      
+      gpUpdateUI 			est une procédure
+      gpTraiterCommande 	est une procédure
+     type : 720896
+  procedures :
+   -
+     name : bAutentification
+     internal_properties : HgAAAB4AAAA2/0vshZ8JHoPkUml3/dIptatEjlfy474JAeYxLjBwEmygWgG9W6lBHGTbFTEgIyYyWBN2qo6fwxQTwA1LmyE=
+     procedure_id : 1749978008649030024
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] bAutentification ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	booléen : <indiquez ici le rôle de la valeur de retour>
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure bAutentification():booleen
+      bOk est un booleen
+      jsAuth est un JSON
+      jsAuth.email	= sSUPABASE_USRLOG
+      jsAuth.password	= sSUPABASE_USRPWD
+      
+      maRequete est un httpRequête
+      maRequete.URL				= sSUPABASE_URL+sSUPABASE_AUTH_URL
+      maRequete.Méthode			= httpPost
+      maRequete.ContentType		= "application/json"
+      maRequete..Entête["apikey"]	= "[%sSUPABASE_APIKEY%]"
+      maRequete.Contenu			= jsAuth
+      
+      reponse est un httpRéponse = HTTPEnvoie(maRequete)
+      SI ErreurDétectée ALORS
+      	Erreur(ErreurInfo(errComplet))
+      SINON
+      	// Extraire le token de la réponse JSON
+      	resultat		est un Variant	= JSONVersVariant(reponse.Contenu)
+      	gsToken			= resultat.access_token
+      	bOk = vrai
+      FIN
+      
+      renvoyer bOk
+     type : 458752
+   -
+     name : bInitParametrage
+     internal_properties : HgAAAB4AAABCo+CA1UBiBsFEMIV8ulcRqjuWf38mYK9fHVQWDkutgduLSQ1oMtVUD5ISY0uJZCGioar79hMx4pUEnshHjqus4St7WeL4ZxRTqrokSfOZffw2UJwgrMWTm+YEsolwMcI=
+     procedure_id : 1749978008649095560
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] bInitParametrage ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	booléen : <indiquez ici le rôle de la valeur de retour>
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure bInitParametrage():booléen
+      bOk est un booléen
+      
+      sSUPABASE_URL			= clEnv.sGetEnv("SUPABASE_URL")
+      sSUPABASE_API_URL		= clEnv.sGetEnv("SUPABASE_API_URL")
+      sSUPABASE_AUTH_URL		= clEnv.sGetEnv("SUPABASE_AUTH_URL")
+      sSUPABASE_APIKEY		= clEnv.sGetEnv("SUPABASE_APIKEY")
+      sSUPABASE_ANON_KEY		= clEnv.sGetEnv("SUPABASE_ANON_KEY")
+      
+      sSUPABASE_USRLOG		= clEnv.sGetEnv("SUPABASE_USRLOG")
+      sSUPABASE_USRPWD		= clEnv.sGetEnv("SUPABASE_USRPWD")
+      
+      bOk = ( sSUPABASE_URL <> "" et
+      	    sSUPABASE_API_URL <> "" ET
+          	sSUPABASE_ANON_KEY <> "" ET
+          	sSUPABASE_APIKEY <> "" ET
+          	sSUPABASE_USRLOG <> "" ET
+          	sSUPABASE_USRPWD <> "" )
+      
+      renvoyer bOk
+     type : 458752
+   -
+     name : ConnecterSupabaseRealtime
+     internal_properties : HgAAAB4AAADuM3PEI5n4D5WrPOxSWPBPgKLEOnlhP2ULWloBGk2BRem4TF+3frCDA0qCQY+17q2FwGg0B5GDC5nagd5kbUDgitmeLAmC
+     procedure_id : 1749978008649161096
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //ConnecterSupabaseRealtime ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure ConnecterSupabaseRealtime()
+      
+      // L'hôte est directement extrait par la fonction, mais l'URL de base est importante
+      // Construire l'URL du WebSocket Realtime avec la clé d'API
+      // Note : L'URL passée à WebSocketClientConnecteSSL ne doit pas contenir l'hôte ni le port
+      // C'est pourquoi nous utilisons SUPABASE_URL + "/realtime/v1?apikey=..."
+      sURLWsPath		est une chaîne	= "/realtime/v1/websocket?apikey=" + sSUPABASE_ANON_KEY + "&vsn=1.0.0"
+      
+      // Extraire l'hôte de l'URL Supabase
+      sHoteSupabase	est une chaîne
+      sHoteSupabase = remplace(sSUPABASE_URL,"https://","")
+      
+      // On prend la partie avant le premier '/' si elle existe
+      // sHoteSupabase = ExtraitChaîne(sHoteSupabase, 1, "/")
+      
+      
+      // Connexion au WebSocket sécurisé
+      WebSocketClientConnectessl("supabase", SupabaseCallback, sHoteSupabase,443,sURLWsPath)
+      
+      
+     type : 458752
+   -
+     name : JoinChannel
+     internal_properties : HgAAAB4AAAA2/0vshZ8JHoPkUml3/dIptatEjlfy474JAeYxLjBwEmygWgG9W6lBHGTbFTEgIyYyWBN2qo6fwxQTwA1LmyE=
+     procedure_id : 1749978008649226632
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //JoinChannel (<sSchemaName> est chaîne, <sTableName> est chaîne)
+      //
+      // Paramètres :
+      //	sSchemaName (chaîne ANSI) : <indiquez ici le rôle de sSchemaName>
+      //	sTableName (chaîne ANSI) : <indiquez ici le rôle de sTableName>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure JoinChannel(sSchemaName est une chaîne, sTableName est une chaîne)
+      
+      sTopic			est une chaîne
+      oMessage		est un Objet JSON
+      oPayloadConfig	est un Objet JSON
+      oBroadcast		est un Objet JSON
+      oPresence		est un Objet JSON
+      
+      
+      sTopic								= "realtime:" + sSchemaName + ":" + sTableName
+      
+      // Construire le message JSON pour la jonction
+      oMessage.event						= "phx_join"
+      oMessage.topic						= sTopic
+      oMessage.ref						= NumériqueVersChaîne(g_nJoinRef++) // Incrémenter et convertir en chaîne
+      
+      // Construire le payload de configuration
+      oBroadcast.self						= Faux
+      oPayloadConfig.broadcast			= oBroadcast
+      oPresence.key						= ""
+      oPayloadConfig.presence				= oPresence
+      oPayloadConfig.track_and_broadcast	= Faux
+      
+      oMessage.payload					= oPayloadConfig
+      
+      // Envoyer le message JSON via le WebSocket
+      SocketEcrit("supabase", JSONVersChaîne(oMessage))
+      
+     type : 458752
+   -
+     name : jsGetListeCommandes
+     internal_properties : HgAAAB4AAAAyD91keW0IHp8uEcmBw4RL6ukwsQ0PEDC4RCbD7feMtDQq4eD9L3S0HD/6p9qP8Aj+XXeRz3o960gT9fxZG2X980IuIq6b2xo=
+     procedure_id : 1749978008649292168
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      // jsGetListeCommandes ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure jsGetListeCommandes():JSON
+      htRequete est une httprequete
+      htResponse est une httpRéponse
+      jsRet est un JSON
+      
+      
+      bAutentification()
+      
+      
+      htRequete.URL = sSUPABASE_URL+sSUPABASE_API_URL+"commande"
+      htRequete..Méthode = httpget
+      htRequete..ContentType	=	"application/json"
+      htRequete..entete["apikey"] = "[%sSUPABASE_APIKEY%]"
+      htRequete..Entête["authorization"] = "Bearer [%gsToken%]"
+      htResponse = HTTPEnvoie(htRequete)
+      SI htResponse.CodeEtat >= 300  ALORS
+      
+      	Erreur("Erreur HTTP "+htResponse.CodeEtat,htResponse.contenu)
+      
+      SINON
+      
+      
+      	jsRet = JSONVersVariant(htResponse.Contenu)
+      
+      FIN
+      
+      renvoyer jsRet
+      
+     type : 458752
+   -
+     name : SupabaseCallback
+     internal_properties : HgAAAB4AAAB09N3elKX1CqVz99gIBVjgxnyAjfZeWXKvrt5nFYrzWPv+UQgC+F46iWsPjt8NKj5HR7qDsG8m2siM8yVp3bMXTqsuR5L4Xw==
+     procedure_id : 1749978008649357704
+     type_code : 15
+     code : |1-
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //SupabaseCallback (<nEvénement>, <sMessage> est chaîne)
+      //
+      // Paramètres :
+      // 	nEvénement : <indiquez ici le rôle de nEvénement>
+      //	sMessage (chaîne ANSI) : <indiquez ici le rôle de sMessage>
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure SupabaseCallback(nEvénement, sMessage est une chaine)
+      
+      quand exception dans
+      	SELON nEvénement
+      		CAS SocketOuverture // Connexion établie
+      
+      			// Une fois connecté, joignez le topic pour écouter les changements sur la table 'commande'
+      			JoinChannel(SCHEMA_NAME, TABLE_NAME)
+      			SupabaseHealth()
+      
+      			// On envoie un ping régulier (heartbeat) pour maintenir la connexion active
+      //			IDTimerPing = Timer( Timer_Callback, 25s ) // Intervalle recommandé par Phoenix Channels
+      //
+      //				PROCÉDURE INTERNE Timer_Callback()
+      //					sJSON est une chaîne = [
+      //						{
+      //						"event": "heartbeat",
+      //						"topic": "phoenix",
+      //						"payload": {},
+      //						"ref": "[%NumériqueVersChaîne(g_nJoinRef++)%]"
+      //						}
+      //					]
+      //
+      //					// Transmission
+      //					si SocketEcrit("supabase", sJSON) = faux alors
+      ////						trace("ERREUR ecriture heartbeat")
+      //					FIN
+      //				FIN
+      
+      
+      		CAS SocketMessage // Message reçu du serveur
+      
+      			SupabaseTraiteMessage(sMessage)
+      
+      
+      
+      		CAS SocketFermeture // Connexion fermée
+      //			FinTimersys(IDTimerPing)
+      //			IDTimerPing = 0
+      
+      			// Gérer la reconnexion si souhaité (ex: Timer pour appeler ConnecterASupabaseRealtime après un délai)
+      
+      
+      		CAS SocketErreur // Erreur de connexion
+      //			FinTimerSys(IDTimerPing)
+      //			IDTimerPing = 0
+      			Erreur("Erreur du socket Supabase: " + sMessage)
+      			// Gérer la reconnexion ou afficher un message à l'utilisateur
+      	FIN
+      
+      FAIRE
+      	fAjouteTexte(fRepExe()+["/"]+"message.json","-----------"+exceptioninfo(errComplet)+rc+"-----"+sMessage+RC+RC+RC)
+      
+      fin
+     type : 458752
+   -
+     name : SupabaseHealth
+     internal_properties : HgAAAB4AAABOHpZmdnMB2MFd2yC5UWOC1hqYGXxaDYWKB+MTdeg0GDBzjOfuQc+BCvzG8S3dy1Lqf+olV1G5f1TIWjPglUI9qmJP5z2JVD4z9jMxAVR5nTe37iAnwxTxBH8guhLzInjw+aTLn6MZdYPLLUlLTYMW35i+9/NxeJqGog==
+     procedure_id : 1749978008649423240
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //SupabaseHealth ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //// Procédure automatique :
+      // La procédure est exécutée manuellement, lors d'un appel dans le code
+      // L'exécution n'aura lieu qu'à la fin du traitement contenant l'appel
+      // Elle s'exécutera dans un thread sécurisé (sans avoir besoin d'appeler la fonction ThreadExecute), sans utilisation de HFSQL
+      // Elle sera répétée en boucle, en attendant 25 secondes entre chaque appel
+      //
+      
+      procédure SupabaseHealth()
+      sJSON est une chaîne
+      
+      g_nJoinRef++
+      sJSON= [
+      	{
+      	"event": "heartbeat",
+      	"topic": "phoenix",
+      	"payload": {},
+      	"ref": "[%NumériqueVersChaîne(g_nJoinRef)%]"
+      	}
+      ]
+      
+      // Transmission
+      SI SocketEcrit("supabase", sJSON) = Faux ALORS
+      	//						trace("ERREUR ecriture heartbeat")
+      FIN
+      
+     type : 458752
+   -
+     name : SupabaseTraiteMessage
+     internal_properties : HgAAAB4AAABYsbfWq0XtFBk9GI/2p+6h9tGwcVVfUIDAZE5rVT8UbFzq+Wi5oxgoILNuc95TrLwaaYuNSy6BW3ZLLfOuQYiuch5gcFw1cbA=
+     procedure_id : 1749978008649488776
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      // SupabaseTraiteMessage ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	Aucune
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure SupabaseTraiteMessage(sMessage)
+      oMessageJSON	est un objet JSON
+      sTopic			est une chaîne
+      oPayload		est un objet JSON
+      sRef			est une chaîne
+      oData			est un objet JSON
+      oNewData		est un objet JSON
+      oOldData		est un objet JSON
+      sNomEvent		est une chaîne
+      
+      
+      si JSONValide(sMessage) alors
+      	// Tente de parser le message comme un JSON
+      	oMessageJSON = ChaîneVersJSON(sMessage)
+      SINON
+      //	fAjouteTexte(fRepExe()+["/"]+"message.json",sMessage+RC)
+      FIN
+      
+      
+      SI oMessageJSON = Null ALORS
+      //	Trace("Réception d'un message non-JSON ou invalide : " + sMessage)
+      	RETOUR
+      FIN
+      
+      // ToastAffiche("Réception d'un message serveur : " + sMessage) // Décommenter pour debug
+      
+      // Extraire les champs du message JSON
+      sTopic		= oMessageJSON.topic
+      sNomEvent	= oMessageJSON.event
+      oPayload	= oMessageJSON.payload
+      sRef		= oMessageJSON.ref
+      
+      // Gérer les différents types d'événements
+      SELON sTopic
+      	CAS "phoenix" // Messages système du framework Phoenix (heartbeats, réponses au ping)
+      		SI sNomEvent = "phx_reply" ALORS
+      			SI oPayload.status = "ok" ALORS
+      				// C'est la réponse à notre ping ou à une autre commande système
+      				// Pas besoin d'action spécifique sauf si on veut loguer
+      			FIN
+      		FIN
+      	CAS "realtime:" + SCHEMA_NAME + ":" + TABLE_NAME // Messages de notre table 'commande'
+      		SELON sNomEvent
+      			CAS "phx_reply"
+      				// Réponse à notre demande de jonction au canal
+      				SI oPayload.status = "ok" ALORS
+      					gsLog = heureverschaine(heuresys(),"HH:MM:SS.CC")+" Channel realtime rejoint avec succès."+rc+gsLog
+      //				SINON
+      //					Trace("Échec de la jonction au channel '" + sTopic + "'. Payload: " + JSONVersChaîne(oPayload))
+      				FIN
+      
+      			CAS "INSERT"
+      				oData		= oPayload.data
+      				oNewData	= oData.new
+      				gsLog = HeureVersChaîne(HeureSys(),"HH:MM:SS.CC")+" Réception nouvelle commande"+RC+gsLog
+      				si gpTraiterCommande <> null alors
+      					gpTraiterCommande("INSERT",oNewData)
+      				FIN
+      				si gpUpdateUI <> null alors
+      					gpUpdateUI()
+      				FIN
+      				// TODO: Intégrez ici votre logique de traitement pour une insertion
+      				// Ex: Ajouter une ligne à un champ Table, rafraîchir une liste, etc.
+      				// EXEMPLE: TableAjouteLigne(Table_Commandes, oNewData.id, oNewData.nom_produit, oNewData.quantite)
+      
+      			CAS "UPDATE"
+      				oData		= oPayload.record
+      				gsLog = HeureVersChaîne(HeureSys(),"HH:MM:SS.CC")+" Réception commande modifiée"+RC+gsLog
+      				SI gpTraiterCommande <> Null ALORS
+      					gpTraiterCommande("UPDATE",oData)
+      					SI gpUpdateUI <> Null ALORS
+      						gpUpdateUI()
+      					FIN
+      				FIN
+      
+      
+      			CAS "DELETE"
+      				oData		= oPayload.data
+      				oOldData	= oData.old // Les données supprimées sont dans 'old'
+      				gsLog = HeureVersChaîne(HeureSys(),"HH:MM:SS.CC")+" Réception commande supprimée"+RC+gsLog
+      				SI gpTraiterCommande <> Null ALORS
+      					gpTraiterCommande("DELETE",oData)
+      					SI gpUpdateUI <> Null ALORS
+      						gpUpdateUI()
+      					FIN
+      				FIN
+      
+      
+      			AUTRE CAS :
+      
+      			//	Trace("Événement non géré pour le topic " + sTopic + " : " + sNomEvent)
+      		FIN
+      	AUTRE CAS :
+      		// Gérer d'autres topics si nécessaire
+      		// Trace("Message d'un topic non géré : " + sTopic)
+      END
+      
+     type : 458752
+   -
+     name : bPopulateCommandes
+     internal_properties : HgAAAB4AAAC4QdWiZiGDrOAqnEGszTafvdCzWCFKssS4bZ3yYDURiXuLakmT9PW7smP6HFftu2SDYTkug3FHMEC7tw==
+     procedure_id : 1749978008649554312
+     type_code : 15
+     code : |1+
+      // Résumé : <indiquez ici ce que fait la procédure>
+      // Syntaxe :
+      //[ <Résultat> = ] bPopulateCommandes ()
+      //
+      // Paramètres :
+      //	Aucun
+      // Valeur de retour :
+      // 	booléen : <indiquez ici le rôle de la valeur de retour>
+      //
+      // Exemple :
+      // <Indiquez ici un exemple d'utilisation>
+      //
+      procédure bPopulateCommandes():booléen
+      bOk est un booléen
+      nCpt est un entier
+      htRequete		est une httpRequête
+      htResponse		est une httpRéponse
+      nHasard est un entier
+      
+      bAutentification()
+      
+      htRequete.URL				= sSUPABASE_URL+sSUPABASE_API_URL+"commande"
+      htRequete..Méthode			= httpPost
+      htRequete..ContentType		=	"application/json"
+      htRequete..Entête["apikey"]	= "[%sSUPABASE_APIKEY%]"
+      htRequete..Entête["authorization"] = "Bearer [%gsToken%]"
+      
+      villes 	est un tableau de chaine = ["PARIS","LYON","MONTPELLIER"]
+      zcp		est un tableau de chaîne = ["75001","69001","34001"]
+      noms 	est un tableau de chaîne = ["IsiNeva","IsiNeva Laurent","IsiNeva Patrice"]
+      InitHasard()
+      
+      pour nCpt = 1 à 10
+      	nHasard = hasard(1,3)
+      
+      	htRequete.Contenu = ChaîneVersJSON( [
+      		{
+      		"societe": "[%noms[nHasard]%]",
+      		"zcodepostal": "[%zcp[nHasard]%]",
+      		"ville": "[%villes[nHasard]%]",
+      		"montantht":"[%hasard(100000,200000)/100%]",
+      		"statut": 1,
+      		"date_creation": "[%Datesys()%]"
+      		}
+      	])
+      
+      	htResponse					= HTTPEnvoie(htRequete)
+      	SI htResponse.CodeEtat >= 300  ALORS
+      
+      		Erreur("Erreur HTTP "+htResponse.CodeEtat,htResponse.Contenu)
+      
+      	FIN
+      
+      fin
+      
+      RENVOYER bOk
+     type : 458752
+  procedure_templates : []
+  property_templates : []
+ code_parameters :
+  internal_properties : HgAAAB4AAADXPUOq6bQdTI/fs1mC0I6nimWl2G84EsAbne5i32IM05uoRA==
+  original_name : COL_SansNom1
+resources :
+ string_res :
+  identifier : 0x1849256f135bc3c5
+  internal_properties : HgAAAB4AAACm76HWfKGWp33VjXInA4cRlqArlgTTA862QGt72W2ld5Y=
+custom_note :
+ internal_properties : HgAAAB4AAABtB9HWVzrXO2+4NDRVK0vmzaNKrCKqH1DBX30lMmGZ
